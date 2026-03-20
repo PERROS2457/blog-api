@@ -1,53 +1,840 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>API Blog</title>
-    <style>
-        body {
-            font-family: Arial;
-            background: #0f172a;
-            color: white;
-            text-align: center;
-            padding: 50px;
-        }
-        h1 {
-            color: #38bdf8;
-        }
-        .card {
-            background: #1e293b;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px auto;
-            width: 60%;
-        }
-        a {
-            color: #22c55e;
-            text-decoration: none;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLOG.API — Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080b10;
+    --surface: #0d1117;
+    --surface2: #131920;
+    --border: rgba(255,255,255,0.06);
+    --accent: #e8ff47;
+    --accent2: #00ffc8;
+    --accent3: #ff5c5c;
+    --text: #e8eaf0;
+    --muted: #5a6478;
+    --font-head: 'Syne', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* === GRAIN OVERLAY === */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* === GRID BACKGROUND === */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(232,255,71,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,255,71,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* === HEADER === */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    height: 60px;
+    background: rgba(8,11,16,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: var(--font-head);
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-dot {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .header-meta {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .status-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent2);
+  }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    background: var(--accent2);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+
+  /* === LAYOUT === */
+  .workspace {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    grid-template-rows: auto 1fr;
+    min-height: calc(100vh - 60px);
+  }
+
+  /* === SIDEBAR === */
+  .sidebar {
+    grid-row: 1 / 3;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .panel {
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+
+  .panel-header:hover { background: rgba(255,255,255,0.02); }
+
+  .panel-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+
+  .panel-label .icon {
+    width: 18px; height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    background: var(--surface2);
+    font-size: 10px;
+  }
+
+  .panel-body {
+    padding: 0 24px 20px;
+  }
+
+  /* === FORM ELEMENTS === */
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 12px;
+  }
+
+  .field label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .field input,
+  .field textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 9px 12px;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    resize: none;
+  }
+
+  .field input:focus,
+  .field textarea:focus {
+    border-color: rgba(232,255,71,0.4);
+    box-shadow: 0 0 0 3px rgba(232,255,71,0.06);
+  }
+
+  .field input::placeholder,
+  .field textarea::placeholder { color: var(--muted); opacity: 0.6; }
+
+  .field textarea { height: 80px; }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* === BUTTONS === */
+  .btn-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 9px 14px;
+    border: none;
+    border-radius: 6px;
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: white;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .btn:hover::after { opacity: 0.08; }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-create { background: var(--accent); color: #080b10; }
+  .btn-update { background: #f59e0b; color: #080b10; }
+  .btn-search { background: transparent; border: 1px solid rgba(0,255,200,0.3); color: var(--accent2); }
+  .btn-search:hover { background: rgba(0,255,200,0.06); }
+  .btn-all { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn-all:hover { border-color: rgba(255,255,255,0.15); color: var(--text); }
+
+  /* === SEARCH PANEL === */
+  .search-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .search-row input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 9px 12px;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-row input:focus { border-color: rgba(0,255,200,0.4); }
+  .search-row input::placeholder { color: var(--muted); opacity: 0.6; }
+
+  /* === MAIN AREA === */
+  .main-area {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .main-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 32px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .view-title {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: -0.3px;
+  }
+
+  .count-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .count-badge span {
+    color: var(--accent);
+    font-weight: bold;
+  }
+
+  .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .sort-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .sort-toggle:hover { border-color: rgba(255,255,255,0.15); color: var(--text); }
+
+  /* === ARTICLES GRID === */
+  .articles-grid {
+    padding: 28px 32px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    align-content: start;
+  }
+
+  /* === ARTICLE CARD === */
+  .article-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    animation: cardIn 0.3s ease both;
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .article-card:hover {
+    border-color: rgba(232,255,71,0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  .article-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .article-card:hover::before { opacity: 1; }
+
+  .card-id {
+    position: absolute;
+    top: 16px; right: 16px;
+    font-size: 10px;
+    color: var(--muted);
+    opacity: 0.5;
+  }
+
+  .card-cat {
+    display: inline-block;
+    background: rgba(232,255,71,0.1);
+    border: 1px solid rgba(232,255,71,0.2);
+    color: var(--accent);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    font-family: var(--font-head);
+    font-weight: 600;
+  }
+
+  .card-title {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.3;
+    margin-bottom: 10px;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+
+  .card-content {
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--muted);
+    margin-bottom: 14px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .card-author {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .author-avatar {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: bold;
+    color: #080b10;
+    font-family: var(--font-head);
+  }
+
+  .author-name {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .card-actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  .btn-icon {
+    width: 28px; height: 28px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: all 0.15s;
+  }
+
+  .btn-del { background: rgba(255,92,92,0.1); color: var(--accent3); }
+  .btn-del:hover { background: rgba(255,92,92,0.2); }
+  .btn-edit { background: rgba(245,158,11,0.1); color: #f59e0b; }
+  .btn-edit:hover { background: rgba(245,158,11,0.2); }
+
+  /* === EMPTY STATE === */
+  .empty-state {
+    grid-column: 1 / -1;
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  .empty-icon {
+    font-size: 40px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+
+  .empty-state h3 {
+    font-family: var(--font-head);
+    font-size: 16px;
+    margin-bottom: 8px;
+    color: rgba(255,255,255,0.2);
+  }
+
+  /* === TOAST === */
+  #toast {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .toast-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: toastIn 0.3s ease;
+    min-width: 240px;
+    backdrop-filter: blur(10px);
+  }
+
+  .toast-item.success { border-color: rgba(0,255,200,0.3); }
+  .toast-item.error { border-color: rgba(255,92,92,0.3); }
+  .toast-item .toast-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .toast-item.success .toast-dot { background: var(--accent2); }
+  .toast-item.error .toast-dot { background: var(--accent3); }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* === SCROLLBAR === */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 900px) {
+    .workspace { grid-template-columns: 1fr; grid-template-rows: auto; }
+    .sidebar { grid-row: auto; border-right: none; border-bottom: 1px solid var(--border); }
+    header { padding: 0 20px; }
+    .articles-grid { padding: 20px; }
+    .main-toolbar { padding: 14px 20px; }
+  }
+</style>
 </head>
 <body>
 
-    <h1>🚀 SERVEUR API Blog Backend</h1>
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    BLOG<span style="color:var(--accent)">.API</span>
+    <span style="color:var(--muted);font-weight:400;font-size:11px;margin-left:4px">Studio</span>
+  </div>
+  <div class="header-meta">
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      API Connected
+    </div>
+    <span>/api/articles</span>
+  </div>
+</header>
 
-    <div class="card">
-        <p>Bienvenue sur mon API de gestion d’articles.</p>
-        <p>Développée avec Node.js et Express.</p>
+<div class="workspace">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- CREATE / EDIT PANEL -->
+    <div class="panel">
+      <div class="panel-header" onclick="togglePanel(this)">
+        <div class="panel-label">
+          <span class="icon">✦</span>
+          Composer
+        </div>
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="transition:transform 0.2s;color:var(--muted)">
+          <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="panel-body">
+        <div class="field">
+          <label>Article ID <span style="color:var(--muted);opacity:0.6">(modifier uniquement)</span></label>
+          <input id="id" placeholder="ex: 42">
+        </div>
+        <div class="field">
+          <label>Titre</label>
+          <input id="titre" placeholder="Un titre accrocheur…">
+        </div>
+        <div class="field">
+          <label>Contenu</label>
+          <textarea id="contenu" placeholder="Votre contenu ici…"></textarea>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Auteur</label>
+            <input id="auteur" placeholder="Nom">
+          </div>
+          <div class="field">
+            <label>Catégorie</label>
+            <input id="categorie" placeholder="Tech, Design…">
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-create" onclick="ajouter()">＋ Créer</button>
+          <button class="btn btn-update" onclick="modifier()">↻ Modifier</button>
+        </div>
+      </div>
     </div>
 
-    <div class="card">
-        <h3>📌 Endpoints disponibles :</h3>
-        <p>GET /api/articles</p>
-        <p>POST /api/articles</p>
-        <p>PUT /api/articles/:id</p>
-        <p>DELETE /api/articles/:id</p>
-        <p>GET /api/articles/search?query=mot</p>
+    <!-- SEARCH PANEL -->
+    <div class="panel">
+      <div class="panel-header" onclick="togglePanel(this)">
+        <div class="panel-label">
+          <span class="icon">⌕</span>
+          Recherche
+        </div>
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="transition:transform 0.2s;color:var(--muted)">
+          <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="panel-body">
+        <div class="search-row">
+          <input id="search" placeholder="Mot-clé, auteur, catégorie…" onkeydown="if(event.key==='Enter') rechercher()">
+          <button class="btn btn-search" onclick="rechercher()">→</button>
+        </div>
+        <button class="btn btn-all" style="width:100%;margin-top:10px" onclick="charger()">Afficher tous</button>
+      </div>
     </div>
 
-    <div class="card">
-        <p>Testez l’API avec Postman 🚀</p>
+    <!-- API INSPECTOR -->
+    <div class="panel">
+      <div class="panel-header" onclick="togglePanel(this)">
+        <div class="panel-label">
+          <span class="icon">◈</span>
+          Dernière requête
+        </div>
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="transition:transform 0.2s;color:var(--muted)">
+          <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="panel-body">
+        <div id="api-log" style="font-size:11px;color:var(--muted);line-height:1.8;">
+          <span style="color:rgba(255,255,255,0.1)">En attente d'activité…</span>
+        </div>
+      </div>
     </div>
 
+  </aside>
+
+  <!-- MAIN AREA -->
+  <main class="main-area">
+    <div class="main-toolbar">
+      <div class="toolbar-left">
+        <span class="view-title">Articles</span>
+        <div class="count-badge" id="count-badge"><span>0</span> article(s)</div>
+      </div>
+      <div class="toolbar-right">
+        <button class="sort-toggle" onclick="charger()">↺ Actualiser</button>
+      </div>
+    </div>
+
+    <div class="articles-grid" id="articles">
+      <div class="empty-state">
+        <div class="empty-icon">◫</div>
+        <h3>Aucun article chargé</h3>
+        <p style="font-size:12px">Cliquez sur "Afficher tous" pour commencer</p>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast"></div>
+
+<script>
+  const API = "/api/articles";
+
+  // ── PANEL TOGGLE ─────────────────────────────────────────────
+  function togglePanel(header) {
+    const body = header.nextElementSibling;
+    const arrow = header.querySelector('svg');
+    const isOpen = body.style.display !== 'none';
+    body.style.display = isOpen ? 'none' : 'block';
+    arrow.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0)';
+  }
+
+  // ── TOAST ─────────────────────────────────────────────────────
+  function toast(msg, type = 'success') {
+    const container = document.getElementById('toast');
+    const el = document.createElement('div');
+    el.className = `toast-item ${type}`;
+    el.innerHTML = `<div class="toast-dot"></div><span>${msg}</span>`;
+    container.appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(20px)'; el.style.transition = '0.3s'; setTimeout(() => el.remove(), 300); }, 3000);
+  }
+
+  // ── API LOG ───────────────────────────────────────────────────
+  function logRequest(method, url, status) {
+    const colors = { GET: '#00ffc8', POST: '#e8ff47', PUT: '#f59e0b', DELETE: '#ff5c5c' };
+    const statusColor = status >= 200 && status < 300 ? '#00ffc8' : '#ff5c5c';
+    document.getElementById('api-log').innerHTML = `
+      <div><span style="color:${colors[method]||'white'};font-weight:bold">${method}</span> <span style="color:rgba(255,255,255,0.5)">${url}</span></div>
+      <div style="margin-top:4px">Status <span style="color:${statusColor}">${status}</span> · ${new Date().toLocaleTimeString()}</div>
+    `;
+  }
+
+  // ── DISPLAY ───────────────────────────────────────────────────
+  function afficher(data) {
+    const container = document.getElementById('articles');
+    const badge = document.getElementById('count-badge');
+    badge.innerHTML = `<span>${data.length}</span> article(s)`;
+
+    if (!data.length) {
+      container.innerHTML = `<div class="empty-state"><div class="empty-icon">◫</div><h3>Aucun résultat</h3><p style="font-size:12px">Essayez un autre mot-clé</p></div>`;
+      return;
+    }
+
+    container.innerHTML = data.map((a, i) => {
+      const initials = (a.auteur || '?').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+      return `
+      <div class="article-card" style="animation-delay:${i * 40}ms">
+        <span class="card-id">#${a.id}</span>
+        ${a.categorie ? `<div class="card-cat">${a.categorie}</div>` : ''}
+        <div class="card-title">${a.titre || 'Sans titre'}</div>
+        <div class="card-content">${a.contenu || ''}</div>
+        <div class="card-footer">
+          <div class="card-author">
+            <div class="author-avatar">${initials}</div>
+            <span class="author-name">${a.auteur || 'Anonyme'}</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn-icon btn-edit" title="Éditer" onclick="prefill(${JSON.stringify(a).replace(/"/g,'&quot;')})">✎</button>
+            <button class="btn-icon btn-del" title="Supprimer" onclick="supprimer(${a.id})">✕</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── PRE-FILL FORM ─────────────────────────────────────────────
+  function prefill(a) {
+    document.getElementById('id').value = a.id;
+    document.getElementById('titre').value = a.titre || '';
+    document.getElementById('contenu').value = a.contenu || '';
+    document.getElementById('auteur').value = a.auteur || '';
+    document.getElementById('categorie').value = a.categorie || '';
+    document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+    toast('Article #' + a.id + ' chargé dans l\'éditeur', 'success');
+  }
+
+  // ── GET ALL ───────────────────────────────────────────────────
+  function charger() {
+    fetch(API)
+      .then(res => { logRequest('GET', API, res.status); return res.json(); })
+      .then(data => afficher(data))
+      .catch(() => toast('Erreur de connexion à l\'API', 'error'));
+  }
+
+  // ── CREATE ────────────────────────────────────────────────────
+  function ajouter() {
+    const data = {
+      titre: document.getElementById('titre').value,
+      contenu: document.getElementById('contenu').value,
+      auteur: document.getElementById('auteur').value,
+      categorie: document.getElementById('categorie').value
+    };
+    if (!data.titre) { toast('Le titre est requis', 'error'); return; }
+    fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+      .then(res => { logRequest('POST', API, res.status); return res; })
+      .then(() => { toast('Article créé avec succès ✦', 'success'); charger(); clearForm(); })
+      .catch(() => toast('Erreur lors de la création', 'error'));
+  }
+
+  // ── DELETE ────────────────────────────────────────────────────
+  function supprimer(id) {
+    if (!confirm(`Supprimer l'article #${id} ?`)) return;
+    fetch(API + '/' + id, { method: 'DELETE' })
+      .then(res => { logRequest('DELETE', API + '/' + id, res.status); charger(); toast('Article supprimé', 'error'); })
+      .catch(() => toast('Erreur lors de la suppression', 'error'));
+  }
+
+  // ── UPDATE ────────────────────────────────────────────────────
+  function modifier() {
+    const id = document.getElementById('id').value;
+    if (!id) { toast('Saisissez un ID pour modifier', 'error'); return; }
+    const data = {
+      titre: document.getElementById('titre').value,
+      contenu: document.getElementById('contenu').value,
+      categorie: document.getElementById('categorie').value
+    };
+    const url = API + '/' + id;
+    fetch(url, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+      .then(res => { logRequest('PUT', url, res.status); return res; })
+      .then(() => { toast('Article #' + id + ' modifié ↻', 'success'); charger(); clearForm(); })
+      .catch(() => toast('Erreur lors de la modification', 'error'));
+  }
+
+  // ── SEARCH ────────────────────────────────────────────────────
+  function rechercher() {
+    const mot = document.getElementById('search').value;
+    if (!mot) { charger(); return; }
+    const url = API + '/search?query=' + encodeURIComponent(mot);
+    fetch(url)
+      .then(res => { logRequest('GET', url, res.status); return res.json(); })
+      .then(data => afficher(data))
+      .catch(() => toast('Erreur de recherche', 'error'));
+  }
+
+  // ── CLEAR FORM ────────────────────────────────────────────────
+  function clearForm() {
+    ['id','titre','contenu','auteur','categorie'].forEach(id => document.getElementById(id).value = '');
+  }
+
+  // ── AUTO-LOAD ─────────────────────────────────────────────────
+  charger();
+</script>
 </body>
 </html>
