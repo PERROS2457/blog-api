@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1773912113805,
+    "titre": "Introduction à Node.js",
+    "contenu": "Node.js permet d'exécuter du JavaScript côté serveur.",
+    "auteur": "Alice",
+    "categorie": "Backend",
+    "tags": [
+      "nodejs",
+      "javascript"
+    ],
+    "date": "2026-03-19T09:21:53.805Z"
+  },
+  {
+    "id": 1773912202896,
+    "titre": "Comprendre les API REST",
+    "contenu": "Les API REST permettent la communication entre applications.",
+    "auteur": "Bob",
+    "categorie": "API",
+    "tags": [
+      "api",
+      "rest"
+    ],
+    "date": "2026-03-19T09:23:22.896Z"
+  }
+]

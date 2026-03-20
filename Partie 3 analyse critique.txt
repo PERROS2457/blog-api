@@ -1,0 +1,31 @@
+		Partie 3
+analyse critique :
+
+	partie 1 : utilisation de cleeroute
+etape 1 : creation du compte :
+Interface simple et claire; Inscription rapide; une connexion avec Google
+
+etape 2 : definition de niveua et de l'objectif
+La plateforme propose une bonne personnalisation du parcours selon le niveau de l’utilisateur.
+Cependant, il serait utile d’avoir des exemples concrets pour aider les débutants à mieux choisir leur niveau.
+
+etape 3 : Le paramétrage du profil permet une bonne personnalisation de l’apprentissage.
+
+etape 4 : generation du parcours :
+La génération automatique du parcours est très utile car elle guide l’utilisateur sans qu’il ait à chercher par lui-même.
+Cependant, il serait intéressant de permettre une personnalisation plus poussée du parcours, comme la suppression ou l’ajout manuel de certains modules.
+
+étape 5 : suivi des modules
+Les modules sont bien structurés et faciles à suivre.
+
+étape 6 : Prise des notes
+La fonctionnalité de prise de notes est très utile pour retenir les informations importantes.
+
+étape 7 ajouter des sources et les interroger dans le chat de l'assistant
+L’ajout de sources est très utile pour approfondir les connaissances.
+Le chat assistant facilite la compréhension en apportant des réponses rapides.
+Cependant, il serait intéressant d’améliorer la précision des réponses ou d’ajouter des exemples concrets.
+
+étape 8 : Participer au Quiz pour évaluer votre compréhension du cours
+Le quiz est un bon moyen de tester ses connaissances et de s’auto-évaluer.
+.il serait intéressant d’avoir des explications détaillées pour chaque réponse afin de mieux comprendre les erreurs comme vous l'avez intégré.
