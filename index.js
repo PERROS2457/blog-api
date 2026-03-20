@@ -2,6 +2,8 @@ const express = require('express');
 const app = express();
 const PORT = 3000;
 const fs = require('fs');
+app.use(express.static('public'));
+
 
 // Lire les données
 const lireArticles = () => {
@@ -21,9 +23,6 @@ let articles = [];
 let id = 1;
 
 // Route test
-app.get('/', (req, res) => {
-    res.send('API Blog fonctionne ');
-});
 
 
 
