@@ -37,7 +37,7 @@ tags
 date
 
 📌 Endpoints 🧪 Tests
-Les tests ont été effectués avec Postman.
+Les tests ont été effectués avec Postman.  mais afin d'avoir une utilisation plus simple, une page web a été mise sur pied : https://blog-api-sp33.onrender.com/
 
 🔹 Créer un article
 
